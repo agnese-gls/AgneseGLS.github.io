@@ -44,6 +44,7 @@
         max-width: 1200px;
         margin: 20px auto;
         padding: 20px;
+        display: flex;
     }
 
     #barcodeContainer {
@@ -51,6 +52,7 @@
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 18px;
         width: 100%;
+        margin-left: 150px; /* Leave space for the fixed column */
     }
 
     .barcode-card {
@@ -150,6 +152,39 @@
         width: 100%;
         max-width: 200px;
     }
+
+    /* Fixed column styles */
+    .fixed-column {
+        position: fixed;
+        top: 50px; /* Adjusted to account for the top bar height */
+        left: 0;
+        height: calc(100% - 50px); /* Adjusted to exclude the top bar height */
+        background-color: #f8f9fa;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border-right: 1px solid #ddd;
+    }
+
+    .fixed-column .add-ct-button {
+        padding: 10px 20px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .fixed-column .add-ct-button:first-child {
+        margin-top: 10px; /* Add top margin to match lateral space */
+    }
+
+    .fixed-column .add-ct-button:hover {
+        background-color: #0056b3;
+    }
 </style>
 </head>
 <body>
@@ -160,6 +195,11 @@
     </div>
 
     <div class="container">
+        <!-- Left-side column -->
+        <div class="fixed-column">
+            <button id="add-ct1-button" class="add-ct-button">Add CT1</button>
+        </div>
+
         <!-- Container for dynamic rows -->
         <div id="barcodeContainer"></div>
     </div>
@@ -343,6 +383,18 @@
                 reader.readAsText(file);
             }
         });
+
+        // CT buttons functionality
+        function addCTBarcode(ctType, value) {
+            if (value) {
+                const ctValue = `${ctType}${value}`;
+                createBarcodeRow(ctValue);
+            } else {
+                alert("Invalid barcode value.");
+            }
+        }
+
+        document.getElementById('add-ct1-button').addEventListener('click', () => addCTBarcode('CT', '0000000001'));
     </script>
 </body>
 </html>
