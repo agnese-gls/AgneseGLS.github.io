@@ -301,19 +301,21 @@
             const infoDiv = document.createElement('div');
             infoDiv.classList.add('barcode-info');
             if (name || weight || address) {
+                if (address) {
+                    const addressEl = document.createElement('p');
+                    addressEl.textContent = address;
+                    addressEl.style.fontWeight = 'bold';
+                    addressEl.style.fontSize = '18px';
+                    infoDiv.appendChild(addressEl);
+                }
                 if (name) {
                     const nameEl = document.createElement('p');
                     nameEl.textContent = name;
                     infoDiv.appendChild(nameEl);
                 }
-                if (address) {
-                    const addressEl = document.createElement('p');
-                    addressEl.textContent = address;
-                    infoDiv.appendChild(addressEl);
-                }
                 if (weight) {
                     const weightEl = document.createElement('p');
-                    weightEl.textContent = weight;
+                    weightEl.textContent = weight + ' kg';
                     infoDiv.appendChild(weightEl);
                 }
             }
@@ -367,7 +369,7 @@
                                 const houseNumber = item.DeliveryHouseNumber || "Unknown House Number";
                                 const city = item.DeliveryCity || "Unknown City";
                                 const zipcode = item.DeliveryZipCode || "Unknown Zip Code";
-                                const address = `${street} ${houseNumber}, ${city} ${zipcode}`;
+                                const address = `${street} ${houseNumber}, ${zipcode}`;
 
                                 if (id) {
                                     createBarcodeRow(id, name, weight, address);
