@@ -200,6 +200,8 @@
         <!-- Left-side column -->
         <div class="fixed-column">
             <button id="add-ct1-button" class="add-ct-button">Add CT1</button>
+            <button id="ps-id-button" class="add-ct-button">PS ID Island Brygge</button>
+            <button id="wrong-ps-id-button" class="add-ct-button">Wrong PS ID</button>
         </div>
 
         <!-- Container for dynamic rows -->
@@ -399,6 +401,16 @@
         }
 
         document.getElementById('add-ct1-button').addEventListener('click', () => addCTBarcode('CT', '0000000001'));
+
+        // Add functionality for "PS ID Island Brygge" button
+        document.getElementById('ps-id-button').addEventListener('click', () => {
+            createBarcodeRow('PS2080099601');
+        });
+
+        // Add functionality for "Wrong PS ID" button
+        document.getElementById('wrong-ps-id-button').addEventListener('click', () => {
+            createBarcodeRow('PS2080099609');
+        });
     </script>
 </body>
 </html>
