@@ -202,6 +202,7 @@
             <button id="add-ct1-button" class="add-ct-button">Add CT1</button>
             <button id="ps-id-button" class="add-ct-button">PS ID Island Brygge</button>
             <button id="wrong-ps-id-button" class="add-ct-button">Wrong PS ID</button>
+            <button id="clear-all-button" class="add-ct-button">Clear All</button>
         </div>
 
         <!-- Container for dynamic rows -->
@@ -410,6 +411,11 @@
         // Add functionality for "Wrong PS ID" button
         document.getElementById('wrong-ps-id-button').addEventListener('click', () => {
             createBarcodeRow('PS2080099609');
+        });
+
+        document.getElementById('clear-all-button').addEventListener('click', () => {
+            const barcodeContainer = document.getElementById('barcodeContainer');
+            barcodeContainer.innerHTML = ''; // Clear all barcode cards
         });
     </script>
 </body>
