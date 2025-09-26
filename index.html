@@ -203,6 +203,7 @@
             <button id="ps-id-button" class="add-ct-button">PS ID Island Brygge</button>
             <button id="wrong-ps-id-button" class="add-ct-button">Wrong PS ID</button>
             <button id="clear-all-button" class="add-ct-button">Clear All</button>
+            <button id="generate-10-barcodes-button" class="add-ct-button">Generate 10 Barcodes</button>
         </div>
 
         <!-- Container for dynamic rows -->
@@ -416,6 +417,39 @@
         document.getElementById('clear-all-button').addEventListener('click', () => {
             const barcodeContainer = document.getElementById('barcodeContainer');
             barcodeContainer.innerHTML = ''; // Clear all barcode cards
+        });
+
+        function calculateCheckDigit(data) {
+            const weight = "31";
+            const modulusValue = 10;
+
+            const offset = data.startsWith("0") ? 0 : 1;
+            let sum = offset;
+
+            for (let i = 0; i < data.length; i++) {
+                const valueAsInt = parseInt(data[i], 10);
+                const weightAsInt = parseInt(weight[i % weight.length], 10);
+                sum += valueAsInt * weightAsInt;
+            }
+
+            const checkDigit = modulusValue - (sum % modulusValue);
+            return checkDigit === 10 ? '0' : checkDigit.toString();
+        }
+
+        function generateBarcode() {
+            let base = '';
+            for (let i = 0; i < 11; i++) {
+                base += Math.floor(Math.random() * 10).toString();
+            }
+            const checkDigit = calculateCheckDigit(base);
+            return base + checkDigit;
+        }
+
+        document.getElementById('generate-10-barcodes-button').addEventListener('click', () => {
+            for (let i = 0; i < 10; i++) {
+                const barcode = generateBarcode();
+                createBarcodeRow(barcode);
+            }
         });
     </script>
 </body>
