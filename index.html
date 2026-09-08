@@ -160,6 +160,8 @@
         position: fixed;
         top: 50px; /* Adjusted to account for the top bar height */
         left: 0;
+        width: 150px;
+        box-sizing: border-box;
         height: calc(100% - 50px); /* Adjusted to exclude the top bar height */
         background-color: #f8f9fa;
         padding: 10px;
@@ -170,7 +172,7 @@
     }
 
     .fixed-column .add-ct-button {
-        padding: 10px 20px;
+        padding: 10px 12px;
         background-color: #007BFF;
         color: white;
         border: none;
@@ -178,6 +180,7 @@
         border-radius: 5px;
         font-size: 16px;
         text-align: center;
+        line-height: 1.2;
     }
 
     .fixed-column .add-ct-button:first-child {
@@ -193,12 +196,13 @@
     <div class="top-bar">
         <input type="text" id="manual-barcode-input" placeholder="Enter barcode number" />
         <button id="add-barcode-button">Add Barcode</button>
-        <button id="upload-button">Upload parcel data entity JSON File</button>
     </div>
 
     <div class="container">
         <!-- Left-side column -->
         <div class="fixed-column">
+            <button id="upload-button" class="add-ct-button">Upload JSON</button>
+            <button id="bos-upload-button" class="add-ct-button">Upload from BOS</button>
             <button id="add-ct1-button" class="add-ct-button">Add CT1</button>
             <button id="ps-id-button" class="add-ct-button">PS ID Island Brygge</button>
             <button id="wrong-ps-id-button" class="add-ct-button">Wrong PS ID</button>
@@ -220,6 +224,7 @@
 
     <!-- Add accept attribute to file input -->
     <input type="file" id="file-input" accept=".json" style="display: none;">
+    <input type="file" id="bos-file-input" accept=".json" style="display: none;">
 
     <script>
         // Modal logic
@@ -389,7 +394,67 @@
                     }
                 };
                 reader.readAsText(file);
+                event.target.value = ""; // Allow re-uploading the same file
             }
+        });
+
+        // BOS upload: find parcels anywhere in the JSON structure
+        function decimalValue(value) {
+            if (value === null || value === undefined) return "";
+            if (typeof value === 'object') return value.$numberDecimal ?? "";
+            return value;
+        }
+
+        function collectBosParcels(node, found) {
+            if (Array.isArray(node)) {
+                node.forEach(child => collectBosParcels(child, found));
+            } else if (node && typeof node === 'object') {
+                if (typeof node.ParcelNumber === 'string' && node.ParcelNumber) {
+                    found.push(node);
+                }
+                Object.values(node).forEach(child => collectBosParcels(child, found));
+            }
+        }
+
+        document.getElementById('bos-upload-button').addEventListener('click', () => {
+            document.getElementById('bos-file-input').click();
+        });
+
+        document.getElementById('bos-file-input').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const parcels = [];
+                    collectBosParcels(data, parcels);
+
+                    if (parcels.length === 0) {
+                        alert("No parcels found in this file.");
+                        return;
+                    }
+
+                    parcels.forEach(parcel => {
+                        const receiver = parcel.Receiver || {};
+                        const addr = receiver.Address || {};
+                        const name = addr.Name || receiver.ContactPerson || "";
+                        const weight = decimalValue(parcel.Weight);
+                        const street = addr.StreetName || "";
+                        const houseNumber = addr.HouseNumber || "";
+                        const zipcode = addr.ZipCode || "";
+                        const address = `${street} ${houseNumber}, ${zipcode}`.trim();
+
+                        createBarcodeRow(parcel.ParcelNumber, name, weight, address);
+                    });
+                } catch (error) {
+                    console.error("Error parsing BOS JSON file:", error);
+                    alert("Could not parse this file as JSON.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ""; // Allow re-uploading the same file
         });
 
         // CT buttons functionality
