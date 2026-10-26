@@ -155,6 +155,24 @@
         max-width: 200px;
     }
 
+    #convert-input {
+        margin-top: 10px;
+        font-family: monospace;
+        font-size: 14px;
+    }
+    #convert-submit {
+        margin-top: 10px;
+        padding: 8px 20px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #convert-submit:hover {
+        background-color: #0056b3;
+    }
+
     /* Fixed column styles */
     .fixed-column {
         position: fixed;
@@ -169,6 +187,7 @@
         flex-direction: column;
         gap: 10px;
         border-right: 1px solid #ddd;
+        overflow-y: auto;
     }
 
     .fixed-column .add-ct-button {
@@ -207,6 +226,7 @@
             <button id="ps-id-button" class="add-ct-button">PS ID Island Brygge</button>
             <button id="wrong-ps-id-button" class="add-ct-button">Wrong PS ID</button>
             <button id="generate-10-barcodes-button" class="add-ct-button">Generate 10 Barcodes</button>
+            <button id="convert-11-to-12-button" class="add-ct-button">Convert 11 to 12 digit</button>
             <button id="clear-all-button" class="add-ct-button">Clear All</button>
         </div>
 
@@ -219,6 +239,16 @@
         <div class="modal-content">
             <span class="close-modal" id="close-modal">&times;</span>
             <div id="live-preview"></div>
+        </div>
+    </div>
+
+    <!-- Modal for 11 -> 12 digit conversion -->
+    <div id="convert-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-convert-modal">&times;</span>
+            <textarea id="convert-input" rows="10" cols="30"
+                placeholder="Paste 11-digit codes (one per line, or separated by spaces/commas)"></textarea>
+            <button id="convert-submit">Convert</button>
         </div>
     </div>
 
@@ -272,10 +302,11 @@
             }
         };
 
-        // Hide modal on Escape key
+        // Hide modals on Escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 hidePreviewModal();
+                hideConvertModal();
             }
         });
 
@@ -515,6 +546,42 @@
                 const barcode = generateBarcode();
                 createBarcodeRow(barcode);
             }
+        });
+
+        // Convert 11 to 12 digit functionality
+        const convertModal = document.getElementById('convert-modal');
+        const convertInput = document.getElementById('convert-input');
+
+        function hideConvertModal() {
+            convertModal.style.display = 'none';
+            convertInput.value = '';
+        }
+
+        document.getElementById('convert-11-to-12-button').addEventListener('click', () => {
+            convertModal.style.display = 'flex';
+            convertInput.focus();
+        });
+
+        document.getElementById('close-convert-modal').onclick = hideConvertModal;
+
+        convertModal.addEventListener('click', (event) => {
+            if (event.target === convertModal) hideConvertModal();
+        });
+
+        document.getElementById('convert-submit').addEventListener('click', () => {
+            const codes = convertInput.value.split(/[\s,;]+/).filter(Boolean);
+            const valid = codes.filter(c => /^\d{11}$/.test(c));
+            const invalid = codes.filter(c => !/^\d{11}$/.test(c));
+
+            // Reverse so the first code in the list ends up at the top (cards are prepended)
+            valid.slice().reverse().forEach(code => {
+                createBarcodeRow(code + calculateCheckDigit(code));
+            });
+
+            if (invalid.length) {
+                alert("Skipped invalid codes (must be exactly 11 digits):\n" + invalid.join('\n'));
+            }
+            hideConvertModal();
         });
     </script>
 </body>
